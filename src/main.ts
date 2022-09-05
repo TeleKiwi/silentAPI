@@ -1,25 +1,34 @@
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { join } from "path";
 
-function post(data: object, id: string, callback: Function) {
-    const path = ["./data", id, ".json"];
-    writeFileSync(path.join(""), JSON.stringify(data), 'utf-8');
-    callback();
+export class SilentAPI {
+    get(id: string, callback: Function) {
+        id = id.split("/")[1];
+        id += ".json";
+        const finalPath = join("./data/", id);
+        const data = readFileSync(finalPath);
+        callback(data.toString());
+    }
+
+    post(data: object, id: string, callback: Function) {
+        const path = ["./data", id, ".json"].join("");
+        writeFileSync(path, JSON.stringify(data), 'utf-8');
+        callback();
+    }
+    
+    patch(data: object, id: string, callback: Function) {
+        const path = ["./data", id, ".json"].join("");
+        if(existsSync(path)) {
+            writeFileSync(path, JSON.stringify(data), 'utf-8');
+        }
+        callback();
+    }
+
+    delete(id: string, callback: Function) {
+        const path = ["./data", id, ".json"].join();
+        unlinkSync(path);
+        callback();
+    }
+    
 }
 
-function get(id: string, callback: Function) {
-    id = id.split("/")[1];
-    id += ".json";
-    const finalPath = join("./data/", id);
-    const data = readFileSync(finalPath);
-    callback(data.toString());
-}
-
-/*
-post({ message: "test" }, "/testFile", () => {
-    console.log("I did it!");
-})
-
-get("/testFile", (data: string) => {
-    console.log(data);
-}) */
